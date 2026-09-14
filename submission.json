@@ -1,0 +1,149 @@
+{
+  "api_key": "IVY26-9AABC3657146",
+  "candidate": {
+    "name": "Ayushman Raj",
+    "email": "ayushman.20235024@mnnit.ac.in",
+    "repo_url": "https://github.com/AyushmanRaj9507/ivy-homes-assignment",
+    "demo_url": "YOUR_VERCEL_URL"
+  },
+  "answers": {
+    "total_listing_records": 4700,
+    "unique_properties": 4700,
+    "active_listings": 3722,
+    "corrupt_listing_ids": [
+      "100-1002346",
+      "100-1002884",
+      "DWE-1001165",
+      "DWE-1001183",
+      "DWE-1001909",
+      "MAG-1000179",
+      "MAG-1000885",
+      "MAG-1003269",
+      "MAG-1003510",
+      "SQU-1000979",
+      "SQU-1002843",
+      "ZER-1001207",
+      "ZER-1001249",
+      "ZER-1001334",
+      "ZER-1002632",
+      "ZER-1002911"
+    ],
+    "total_monthly_rent": 7134800,
+    "avg_price_per_sqft_2bhk": 21063.00,
+    "costliest_project": {
+      "project_id": "P10068",
+      "price_max_inr": 100
+    },
+    "listings_last_7_days": 149,
+    "fake_listing_ids": [
+      "100-1002501",
+      "DWE-1002631",
+      "DWE-1003102",
+      "MAG-1003492",
+      "SQU-1001431",
+      "SQU-1003524",
+      "ZER-1003652",
+      "ZER-1003813"
+    ],
+    "projects_with_wrong_listing_count": 392
+  },
+  "findings": [
+    {
+      "endpoint": "/v1/listings",
+      "category": "pagination",
+      "documented": "The listings collection supports pagination.",
+      "actual": "The page parameter does not advance pagination. page=2&limit=50 returns offset=0 and the same first listing as offset=0&limit=50.",
+      "how_found": "Compared GET /v1/listings?offset=0&limit=50 with GET /v1/listings?page=2&limit=50.",
+      "impact": "Clients using page-based pagination may repeatedly retrieve the first page instead of progressing through the collection.",
+      "evidence": [
+        "MAG-1002627"
+      ]
+    },
+    {
+      "endpoint": "/v1/listings",
+      "category": "completeness",
+      "documented": "The response exposes a total field representing the collection size.",
+      "actual": "The API reports total=4537, but offset-based traversal using limit=50 retrieves 4700 records before has_more becomes false.",
+      "how_found": "Fetched the listings collection using offset-based pagination and continued increasing the offset by 50 until has_more became false.",
+      "impact": "Clients relying on the reported total may stop after 4537 records and miss 163 retrievable listings.",
+      "evidence": [
+        "MAG-1002627"
+      ]
+    },
+    {
+      "endpoint": "/v1/favourites",
+      "category": "missing_endpoint",
+      "documented": "The API documentation specifies GET /v1/favourites for retrieving the user's favourite listings.",
+      "actual": "GET /v1/favourites returns HTTP 404 Not Found on the running API.",
+      "how_found": "Sent an authenticated GET request to /v1/favourites using a valid API key and fresh access token.",
+      "impact": "Clients cannot retrieve persisted favourites through the documented API endpoint.",
+      "evidence": []
+    },
+    {
+      "endpoint": "/v1/analytics/summary",
+      "category": "missing_endpoint",
+      "documented": "The API documentation specifies GET /v1/analytics/summary.",
+      "actual": "GET /v1/analytics/summary returns HTTP 404 Not Found.",
+      "how_found": "Sent an authenticated GET request to the documented analytics endpoint using a valid API key and fresh access token.",
+      "impact": "The client cannot obtain analytics through the documented endpoint and must compute insights from the underlying datasets.",
+      "evidence": []
+    },
+    {
+      "endpoint": "/v1/listings",
+      "category": "filters",
+      "documented": "The listings endpoint supports filtering by project_id.",
+      "actual": "The project_id=P10020 filter is not applied. The response contains listings with null and different project_id values.",
+      "how_found": "Requested /v1/listings?project_id=P10020&offset=0&limit=50 and inspected the returned records.",
+      "impact": "Clients cannot reliably retrieve listings belonging to a specific project using the project_id filter.",
+      "evidence": [
+        "MAG-1002627",
+        "DWE-1004037",
+        "SQU-1003074"
+      ]
+    },
+    {
+      "endpoint": "/v1/listings/{id}/similar",
+      "category": "missing_endpoint",
+      "documented": "The API documentation specifies an endpoint for retrieving similar listings for a listing.",
+      "actual": "The endpoint returns 404 Not Found for a valid listing ID.",
+      "how_found": "Requested GET /v1/listings/MAG-1002627/similar using a valid listing ID and valid authentication.",
+      "impact": "Clients cannot retrieve similar listings through the documented endpoint.",
+      "evidence": [
+        "MAG-1002627"
+      ]
+    },
+    {
+      "endpoint": "/v1/projects",
+      "category": "data_quality",
+      "documented": "Projects expose price_min and price_max as the project's minimum and maximum prices.",
+      "actual": "Multiple project records have price_min greater than price_max.",
+      "how_found": "Fetched project records using offset-based pagination and compared price_min with price_max.",
+      "impact": "Consumers cannot safely interpret the reported project price range without validating the values.",
+      "evidence": [
+        "P10002",
+        "P10005",
+        "P10017"
+      ]
+    },
+    {
+      "endpoint": "/v1/listing/{id}",
+      "category": "missing_endpoint",
+      "documented": "The API documentation specifies GET /v1/listing/{id} for retrieving a listing by ID.",
+      "actual": "The endpoint returns HTTP 404 Not Found for a listing ID that is present in the listings collection.",
+      "how_found": "First retrieved MAG-1002627 from GET /v1/listings, then requested GET /v1/listing/MAG-1002627 with valid authentication.",
+      "impact": "Clients cannot reliably retrieve individual listing details through the documented listing-detail endpoint.",
+      "evidence": [
+        "MAG-1002627"
+      ]
+    },
+    {
+      "endpoint": "/v1/projects",
+      "category": "consistency",
+      "documented": "Projects expose total_listings as the number of listings associated with the project.",
+      "actual": "The reported total_listings value does not match the number of listings associated with the project for 392 projects.",
+      "how_found": "Fetched the complete projects and listings datasets, grouped listings by project_id, and compared the calculated listing count with each project's reported total_listings.",
+      "impact": "Consumers cannot rely on total_listings for accurate project listing counts.",
+      "evidence": []
+    }
+  ]
+}
