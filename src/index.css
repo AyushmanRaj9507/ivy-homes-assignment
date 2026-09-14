@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    background-color: #F5F6F0;
+  }
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+    font-feature-settings: 'ss01' 1;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display font-normal text-ivy-950;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid #B8873B;
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: #C9DAC7;
+  }
+}
+
+@layer utilities {
+  .hairline {
+    border-color: #D8DDCE;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* subtle scrollbar, in keeping with a quiet, structured interface */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #F5F6F0;
+}
+::-webkit-scrollbar-thumb {
+  background: #C9DAC7;
+  border-radius: 0;
+}
