@@ -46,6 +46,10 @@ export default function Dashboard() {
       ])
 
       const referenceDate = health?.reference_date ?? new Date().toISOString()
+      console.log(
+        "BEYOND API TOTAL IDS:",
+        listings.slice(4537, 4540).map(l => l.listing_id)
+      )
       setDataset({ listings, rentals, projects, referenceDate })
       if (rentals.length > 0 && !locality) {
         setLocality(rentals[0].locality)

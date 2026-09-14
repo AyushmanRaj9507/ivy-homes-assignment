@@ -250,7 +250,6 @@ export function findSuspiciousListings(listings) {
 
   return suspicious
 }
-
 export function projectListingCountMismatches(
   listings,
   projects
@@ -266,7 +265,7 @@ export function projectListingCountMismatches(
     )
   }
 
-  let mismatches = 0
+  const mismatchedProjects = []
 
   for (const p of projects) {
     const actual =
@@ -276,9 +275,16 @@ export function projectListingCountMismatches(
       p.total_listings != null &&
       p.total_listings !== actual
     ) {
-      mismatches += 1
+      mismatchedProjects.push({
+        project_id: p.project_id,
+        reported: p.total_listings,
+        actual: actual
+      })
     }
   }
 
-  return mismatches
+  console.log("PROJECT MISMATCH COUNT:", mismatchedProjects.length)
+  console.table(mismatchedProjects)
+
+  return mismatchedProjects.length
 }
