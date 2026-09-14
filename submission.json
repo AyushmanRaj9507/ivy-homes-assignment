@@ -67,14 +67,16 @@
       "how_found": "Fetched the listings collection using offset-based pagination and continued increasing the offset by 50 until has_more became false.",
       "impact": "Clients relying on the reported total may stop after 4537 records and miss 163 retrievable listings.",
       "evidence": [
-        "MAG-1002627"
+        "MAG-1003432",
+        "MAG-1001220",
+        "SQU-1002833"
       ]
     },
     {
       "endpoint": "/v1/favourites",
       "category": "missing_endpoint",
       "documented": "The API documentation specifies GET /v1/favourites for retrieving the user's favourite listings.",
-      "actual": "GET /v1/favourites returns HTTP 404 Not Found on the running API.",
+      "actual": "GET /v1/favourites returns HTTP 404 Not Found.",
       "how_found": "Sent an authenticated GET request to /v1/favourites using a valid API key and fresh access token.",
       "impact": "Clients cannot retrieve persisted favourites through the documented API endpoint.",
       "evidence": []
@@ -143,7 +145,13 @@
       "actual": "The reported total_listings value does not match the number of listings associated with the project for 392 projects.",
       "how_found": "Fetched the complete projects and listings datasets, grouped listings by project_id, and compared the calculated listing count with each project's reported total_listings.",
       "impact": "Consumers cannot rely on total_listings for accurate project listing counts.",
-      "evidence": []
+      "evidence": [
+        "P10001",
+        "P10002",
+        "P10003",
+        "P10004",
+        "P10005"
+      ]
     }
   ]
 }
